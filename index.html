@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Stopwatch</title>
+    <!-- These scripts will make React and ReactDOM globally available. -->
+    <script src="./../assets/react@16.0.0/umd/react.development.js"></script>
+    <script src="./../assets/react-dom@16.0.0/umd/react-dom.development.js"></script>
+    <!-- This will let us write JSX and ES6 in a script tag with a special type of "text/babel" -->
+    <script src="./../assets/babel-standalone@6.26.0/babel.js"></script>
+    <link rel="stylesheet" href="stopwatch.css">
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+    class Stopwatch extends React.Component {
+
+        state = {
+            timer: null,
+            start: 0,
+            diff: 0,
+            elapsed: 0,
+            running: false
+        };
+
+        componentWillUnmount() {
+            this.clearInterval(this.state.timer);
+            this.setState({timer: null});
+        }
+
+        tick = () => {
+            const elapsed = Date.now() -  this.state.start + this.state.diff;
+            this.setState({elapsed});
+        }
+
+        formatTime = elapsed => {
+            const s = String(Math.floor((elapsed % ( 1000 * 60 )) / 1000) + 100).substring(1);
+            const ms = String(elapsed % 1000 + 1000).substring(1);
+            return `${s}.${ms}`;
+        }
+
+        onClickHandler = () => {
+            if (this.state.running) {
+                clearInterval(this.state.timer);
+                this.setState({running : false, timer: null, diff: this.state.elapsed});
+            } else {
+                const timer = setInterval(this.tick, 33);
+                this.setState({timer, start: new Date(), running: true});
+            }
+        };
+
+        reset = () => {
+            clearInterval(this.state.timer);
+            this.setState({timer: null, running: false, elapsed: 0, start: 0, diff: 0})
+        }
+
+        render() {
+            return (
+                <div className="stopwatch-container">
+                    <div className="stopwatch-digits">{this.formatTime(this.state.elapsed)}</div>
+                    <button onClick={this.onClickHandler}>{this.state.running ? 'Pause' : 'Start'}</button>
+                    <button onClick={this.reset}>Clear</button>
+                </div>
+            )
+        }
+    }
+    ReactDOM.render(<Stopwatch/>, root);
+</script>
+</body>
+
+</html>
